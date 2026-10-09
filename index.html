@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Backend App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 40px;
+      }
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      #output {
+        margin-top: 20px;
+        background: #eef6ff;
+        padding: 15px;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>My Backend App</h1>
+      <input id="nameInput" type="text" placeholder="Enter a name" />
+      <button id="addUserBtn">Add User</button>
+      <div id="output">Loading users...</div>
+    </div>
+
+    <script>
+      const output = document.getElementById('output');
+      const nameInput = document.getElementById('nameInput');
+
+      async function loadUsers() {
+        try {
+          const res = await fetch('http://localhost:3000/api/users');
+          const users = await res.json();
+          output.innerHTML = users.map(user => '<p>' + user.name + '</p>').join('');
+        } catch (err) {
+          output.textContent = 'Error connecting to the backend.';
+        }
+      }
+
+      document.getElementById('addUserBtn').addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+          output.textContent = 'Please enter a name.';
+          return;
+        }
+
+        try {
+          const res = await fetch('http://localhost:3000/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+          });
+
+          const data = await res.json();
+          output.textContent = data.message + ' Added: ' + data.user.name;
+          nameInput.value = '';
+          loadUsers();
+        } catch (err) {
+          output.textContent = 'Could not add user.';
+        }
+      });
+
+      loadUsers();
+    </script>
+  </body>
+</html>
